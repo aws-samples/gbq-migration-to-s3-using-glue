@@ -1,0 +1,12 @@
+[
+        {
+        "table_name": "table_1",
+        "starting_date": "2022-10-09",
+        "ending_date": "2022-10-23"
+        },
+        {
+        "table_name": "table_2",
+        "starting_date": "2022-10-09",
+        "ending_date": "2022-10-23"
+        }
+]

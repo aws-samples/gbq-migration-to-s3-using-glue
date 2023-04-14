@@ -1,0 +1,4 @@
+code/terraform/.terraform
+code/terraform/config
+.DS_Store
+code/terraform/local.tfvars

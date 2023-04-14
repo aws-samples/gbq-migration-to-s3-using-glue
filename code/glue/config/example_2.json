@@ -1,0 +1,8 @@
+[
+    {
+    "table_name": "p_table",
+    "days_behind_start": 7,
+    "days_behind_end": 1,
+    "is_wildcard_table": "true"
+    }
+]
