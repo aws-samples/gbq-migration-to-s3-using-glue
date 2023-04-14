@@ -3,7 +3,7 @@
 * The list of tables to be transferred is provided to the AWS Glue job as a json file
 * Database credentials are stored in AWS Secrets Manager.
 
-![](media/architecture.png)
+![](../../media/architecture.png)
 
 ### How is Data Organized into Google Cloud?
 
