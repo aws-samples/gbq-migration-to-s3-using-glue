@@ -4,7 +4,7 @@
 * The list of tables to be transferred is provided to the AWS Glue job as a json file
 * Database credentials are stored in AWS Secrets Manager.
 
-![](architecture.png)
+![](media/architecture.png)
 
 ## Getting started
 
