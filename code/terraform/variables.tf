@@ -28,10 +28,6 @@ variable "s3_prefix_source" {
   default = "gbq"
 }
 
-variable vpc_id {
-    type = string
-    description = "VPC ID where resource will be deployed"
-}
 
 variable "assets_bucket" {
     type = string
@@ -63,16 +59,6 @@ variable "glue_number_of_workers" {
   default = "10"
 }
 
-variable "assets_bucket_kms_key" {
-  type = string 
-  description = "The KMS Key for Assets Bucket"
-}
-
-variable "landing_bucket_kms_key" {
-  type = string 
-  description = "The KMS Key for Landing Bucket"
-}
-
 variable "connector_class" {
   type = string
   description = "GBQ Glue Connector Class"
@@ -82,5 +68,6 @@ variable "connector_class" {
 variable "connector_url" {
   type = string
   description = "GBQ Glue Connector URL"
+  default = "https://709825985650.dkr.ecr.us-east-1.amazonaws.com/amazon-web-services/glue/bigquery:0.24.2-glue3.0"
 }
 

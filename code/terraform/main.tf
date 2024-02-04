@@ -3,6 +3,8 @@ data "aws_caller_identity" "current" {}
 
 locals {
  arn_prefix = "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key"
+ account_id = data.aws_caller_identity.current.account_id
+ region = data.aws_region.current.id
 }
 
 resource "aws_iam_role" "glue" {
@@ -51,12 +53,13 @@ resource "aws_iam_role_policy_attachment" "ecr" {
 
 resource "aws_secretsmanager_secret" "secrets" {
   name = "${local.name}-base64-glue-secrets-store-${var.env}"
+  kms_key_id = aws_kms_key.cmk.arn
 }
 
 resource "aws_secretsmanager_secret" "secrets_json" {
   name = "${local.name}-json-glue-secrets-store-${var.env}"
+  kms_key_id = aws_kms_key.cmk.arn
 }
-
 
 resource "aws_iam_policy" "read_secrets_manager" {
   name        = "${local.name}-read-secrets-${var.env}"
@@ -77,7 +80,7 @@ resource "aws_iam_policy" "read_secrets_manager" {
       "Resource": ["${aws_secretsmanager_secret.secrets.arn}",
       "${aws_secretsmanager_secret.secrets_json.arn}"]
     },
-    {
+    { 
         "Effect": "Allow",
         "Action": "secretsmanager:ListSecrets",
         "Resource": "*"
@@ -97,8 +100,7 @@ resource "aws_iam_policy" "kms" {
   "Statement": [
     {
       "Action": [
-            "kms:GetParametersForImport",
-            "kms:GetPublicKey",
+
             "kms:Decrypt",
             "kms:Encrypt",
             "kms:GetKeyRotationStatus",
@@ -107,14 +109,17 @@ resource "aws_iam_policy" "kms" {
             "kms:DescribeKey"
       ],
       "Effect": "Allow",
-      "Resource": ["${local.arn_prefix}/${var.assets_bucket_kms_key}",
-      "${local.arn_prefix}/${var.landing_bucket_kms_key}"]
-    },
+      "Resource": ["${aws_kms_key.cmk.arn}"]
+   },
     {
-        "Effect": "Allow",
-        "Action": "kms:DescribeCustomKeyStores",
-        "Resource": "*"
+      "Action": [
+
+            "logs:AssociateKmsKey"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws-glue/jobs/*"]
     }
+
   ]
 }
 EOF
@@ -170,6 +175,7 @@ resource "aws_glue_job" "gbq_instance_job" {
     "--extra-py-files": "s3://${var.assets_bucket}/glue/gbq_incremental_lib.py"
   }
   connections = [aws_glue_connection.gbq_instance.name]
+  security_configuration = aws_glue_security_configuration.gbq.id
 }
 
 resource "aws_glue_connection" "gbq_instance" {
@@ -183,5 +189,77 @@ resource "aws_glue_connection" "gbq_instance" {
     }
 }
 
+resource "aws_glue_security_configuration" "gbq" {
+  name = "${local.name}-glue-security-configuration-${var.env}"
+
+  encryption_configuration {
+    cloudwatch_encryption {
+      kms_key_arn        =  aws_kms_key.cmk.arn
+      cloudwatch_encryption_mode = "SSE-KMS"
+    }
+
+    job_bookmarks_encryption {
+      kms_key_arn        =  aws_kms_key.cmk.arn
+      job_bookmarks_encryption_mode = "CSE-KMS"
+    }
+
+    s3_encryption {
+      kms_key_arn        =  aws_kms_key.cmk.arn
+      s3_encryption_mode = "SSE-KMS"
+    }
+  }
+}
+
+resource "aws_kms_key" "cmk" {
+  description             = "Customer Managed Key"
+  enable_key_rotation = true
+}
+
+resource "aws_kms_key_policy" "cmk" {
+  key_id = aws_kms_key.cmk.id
+  policy = data.aws_iam_policy_document.cmk-log-group.json
+}
+
+
+data "aws_iam_policy_document" "cmk-log-group" {
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+    }
+
+    actions = [
+      "kms:*"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logs.${local.region}.amazonaws.com"]
+    }
+    actions = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+
+    resources = ["*"]
+    condition {
+      test = "ArnLike"
+      values = [
+        "arn:aws:logs:${local.region}:${local.account_id}:*"
+      ]
+      variable = "kms:EncryptionContext:aws:logs:arn"
+    }
+  }
+
+}
 
 

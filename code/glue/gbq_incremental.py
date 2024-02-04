@@ -58,7 +58,6 @@ def main():
         # Creating the Google Big Query Client
         gbq_client = bigquery.Client.from_service_account_info(secret)
 
-        # Fetching the time when the data was loaded
 
         logging.getLogger().setLevel(logging.INFO)
         
@@ -84,15 +83,24 @@ def main():
 
             """If a table is a wildcard table it means that it will have multiple tables..
             
-            For e.g: p_table_* can be p_table_0000000,p_table_0000001 ...etc
+            For e.g: table_* can be table_0000000, table_0000001 ...etc
 
-            So the function run an SQL Query on GBQ and find tables like p_table_
+            So the function run an SQL Query on GBQ and find tables like table_
             """
             
             if is_wildcard_table == "true":
                 logging.info("Found is_wildcard_table true, checking available tables with name like '%s'\n",table_map["table_name"])
 
-                gbq_query = r"SELECT table_name FROM `{0}`.{1}.INFORMATION_SCHEMA.TABLES WHERE table_name like '{2}\\_%';".format(parent_project, dataset, table_map["table_name"])
+                dataset_id = f"{parent_project}.{dataset}"
+
+                table_name_pattern = f'{table_map["table_name"]}\\_%'
+                
+                # Construct the parameterized query
+                gbq_query = """
+                        SELECT table_name 
+                        FROM `{dataset_id}.INFORMATION_SCHEMA.TABLES` 
+                        WHERE table_name LIKE @table_name_pattern;
+                        """
                 
                 query_job = gbq_client.query(gbq_query)
                 
@@ -153,7 +161,7 @@ def loop_through_dates(start_date,end_date,is_wildcard_table,parent_project,data
 
                 This would act like a WHERE STATEMENT
 
-                e.g. SELECT * FROM p_table_0000000 where DATE(_PARTITIONTIME) = <DATE>
+                e.g. SELECT * FROM table_0000000 where DATE(_PARTITIONTIME) = <DATE>
                 
                 """
                 filter_queries = f'(DATE(_PARTITIONTIME) = "{start_date.strftime("%Y-%m-%d")}")'
