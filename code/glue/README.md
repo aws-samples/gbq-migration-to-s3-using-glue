@@ -29,8 +29,16 @@ In such cases, we need an GBQ Client which would run queries on the datasets to 
 
 In this pattern we will use this query:
 ```
-r"SELECT table_name FROM `{0}`.{1}.INFORMATION_SCHEMA.TABLES WHERE table_name like '{2}\\_%';".format(parent_project, dataset,
-table_name)
+    dataset_id = f"{parent_project}.{dataset}"
+
+    table_name_pattern = f'{table_map["table_name"]}\\_%'
+                
+    # Construct the parameterized query
+    gbq_query = """
+                SELECT table_name 
+                FROM `{dataset_id}.INFORMATION_SCHEMA.TABLES` 
+                WHERE table_name LIKE @table_name_pattern;
+                """
 
 ```
 
