@@ -15,11 +15,11 @@ Each dataset is associated with a project.   Projects form the basis for creatin
 
 ### How is Data migrated to AWS?
 
-AWS Glue is a fully managed extract, transform, and load (ETL) service that makes it easy to prepare and load your data for analytics.  AWS Glue Connectors makes it easy for you to transfer data from SaaS applications and custom data sources to your data lake in Amazon S3. With just a few clicks, you can search and select connectors from the AWS Marketplace and begin your data preparation workflow in minutes.  There is a Google Big Query Connector available in the AWS Marketplace.  Follow this blog to learn more.
+AWS Glue is a fully managed extract, transform, and load (ETL) service that makes it easy to prepare and load your data for analytics.  AWS Glue Connectors makes it easy for you to transfer data from SaaS applications and custom data sources to your data lake in Amazon S3. With just a few clicks, you can search and select connectors from the AWS Marketplace and begin your data preparation workflow in minutes.  There is a Google Big Query Connector available in the AWS Marketplace.  Follow this [blog](https://aws.amazon.com/blogs/big-data/migrating-data-from-google-bigquery-to-amazon-s3-using-aws-glue-custom-connectors/) to learn more.
 
 ### Wildcard Tables:
 
-In Google BigQuery, a wildcard table is a virtual table that represents multiple existing tables. It uses the wildcard character "*" in the table name to match multiple tables. Wildcard tables allow you to query multiple tables as if they were a single table, making it easier to consolidate data from multiple sources. The syntax for a wildcard table is [dataset_name].[table_name_prefix]*. To use a wildcard table in a query, you need to provide a date or timestamp range in the WHERE clause to specify which tables should be included in the query.
+In Google BigQuery, a wildcard table is a virtual table that represents multiple existing tables. It uses the wildcard character "\*" in the table name to match multiple tables. Wildcard tables allow you to query multiple tables as if they were a single table, making it easier to consolidate data from multiple sources. The syntax for a wildcard table is [dataset_name].[table_name_prefix]\*. To use a wildcard table in a query, you need to provide a date or timestamp range in the WHERE clause to specify which tables should be included in the query.
 
 ### Limitations of the GBQ Connector:
 
@@ -46,7 +46,7 @@ This query will basically extract all the table under a dataset which fulfills t
 
 ### JSON File Structure:
 * is_wildcard_table: True or False – describe if a table is a wildcard
-* table_name (Required): The name of the Google Biqtable to be transferred to the S3 Bucket
+* table_name (Required): The name of the Google Big Query table to be transferred to the S3 Bucket
 * starting_date  (Optional): Starting date from where you want to transfer the data
 * ending_date  (Optional): Combine it with `starting_date` to get the duration
 * days_behind_start (Optional): Number of days you want to go behind to start transferring data
