@@ -35,7 +35,7 @@ Here you can specify a map containing a list of objects.
 
 ## JSON File Structure:
 * is_wildcard_table: True or False – describe if a table is a wildcard
-* table_name (Required): The name of the Google Biqtable to be transferred to the S3 Bucket
+* table_name (Required): The name of the Google Big Query table to be transferred to the S3 Bucket
 * starting_date  (Optional): Starting date from where you want to transfer the data
 * ending_date  (Optional): Combine it with `starting_date` to get the duration
 * days_behind_start (Optional): Number of days you want to go behind to start transferring data
@@ -62,14 +62,12 @@ terraform init -backend-config="key=${ENV}/terraform.tfstate" -backend-config="r
 
 ```
 terraform plan
-
 ```
 
 7. If you are happy with the changes, you can deploy it using
 
 ```
 terraform apply
-
 ```
 
 ## Security

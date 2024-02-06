@@ -47,7 +47,6 @@ If you want to specify it in the variable file, you can create a terraform.tfvar
 For e.g. create a file `terraform.tfvars` and specify the variables
 ```
 env = "dev"
-vpc_id = <VPC ID>
 s3_landing_bucket = <Name of the S3 Landing Bucket>
 assets_bucket = <Name of the S3 Assets Bucket>
 ```
